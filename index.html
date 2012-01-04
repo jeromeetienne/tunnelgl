@@ -18,6 +18,8 @@
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
 		<script src="vendor/DragPanControls.js"></script>
 
+		<script src="vendor/threex/THREEx.GeometryWobble.js"></script>
+
 		<link  href="css/main.css" rel="stylesheet"/>
 	</head>
 <body>
@@ -25,13 +27,12 @@
     	<div id="container"></div>
 	<!-- info on screen display -->
 	<div id="info">
-		<a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/" target="_blank">LearningThree.js</a>
-		boiler plate for
-		<a href="https://github.com/mrdoob/three.js/" target="_blank">three.js</a>
+		<a href="http://learningthreejs.com/" target="_blank">LearningThree.js</a>
+		tunnel effect
 	</div> 
 	<div id="inlineDoc">
 		<span id="fullscreenDoc"><i>f</i> for fullscreen - </span><i>p</i> for screenshot
-	</div> 
+	</div>
 
 	<script type="text/javascript">
 		var stats, scene, renderer;
@@ -48,13 +49,11 @@
 					antialias		: true,	// to get smoother output
 					preserveDrawingBuffer	: true	// to allow screenshot
 				});
-				renderer.setClearColorHex( 0xBBBBBB, 1 );
+				renderer.setClearColorHex( 0x000000, 1 );
 			// uncomment if webgl is required
-			//}else{
-			//	Detector.addGetWebGLMessage();
-			//	return true;
 			}else{
-				renderer	= new THREE.CanvasRenderer();
+				Detector.addGetWebGLMessage();
+				return true;
 			}
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.getElementById('container').appendChild(renderer.domElement);
@@ -69,12 +68,10 @@
 			scene = new THREE.Scene();
 
 			// put a camera in the scene
-			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.set(0, 0, 5);
+			camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera.position.set(0, 0, 7);
+			camera.lookAt(scene.position)
 			scene.add(camera);
-
-			// create a camera contol
-			cameraControls	= new THREE.DragPanControls(camera)
 
 			// transparently support window resize
 			THREEx.WindowResize.bind(renderer, camera);
@@ -87,12 +84,50 @@
 				document.getElementById('fullscreenDoc').style.display	= "none";				
 			}
 
+			var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
+			light.position.set( 1, 1, 0 ).normalize();
+			scene.add( light );
+
+			var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
+			light.position.set( -1, 1, 0 ).normalize();
+			scene.add( light );
+
+			var light	= new THREE.PointLight( 0x0044FF, 30, 40 );
+			light.position.set( 0, -3, 0 );
+			scene.add( light );
+
+			var light	= new THREE.PointLight( 0xff4400, 20, 30 );
+			light.position.set( 0, 3, 0 );
+			scene.add( light );
+			
+			scene.fog = new THREE.FogExp2( 0x000000, 0.15 );
+
+
+
 			// here you add your objects
 			// - you will most likely replace this part by your own
-			var geometry	= new THREE.TorusGeometry( 1, 0.42 );
-			var material	= new THREE.MeshNormalMaterial();
+			geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
+			//geometry	= new THREE.CylinderGeometry( 1, 1, 10 );
+
+
+			texture	= THREE.ImageUtils.loadTexture( "images/water.jpg" );
+			texture.wrapS	= THREE.RepeatWrapping;
+			texture.wrapT	= THREE.RepeatWrapping;
+			texture.repeat.x	= 1;
+			texture.repeat.y	= 1;
+
+			var material	= new THREE.MeshLambertMaterial({
+				color	: 0xFFFFFF,
+				map	: texture
+			});
+			//var material	= new THREE.MeshNormalMaterial();
+
 			var mesh	= new THREE.Mesh( geometry, material );
+			mesh.rotation.x	= Math.PI/2;
 			scene.add( mesh );
+
+
+			mesh.flipSided = true;
 		}
 
 		// animation loop
@@ -114,7 +149,13 @@
 		function render() {
 
 			// update camera controls
-			cameraControls.update();
+			//cameraControls.update();
+			
+			texture.offset.y	+= 0.005;
+			texture.offset.y	%= 1;
+			texture.offset.x	+= 0.00;
+			texture.offset.x	%= 1;
+			texture.needsUpdate	= true;
 
 			// actually render the scene
 			renderer.render( scene, camera );
