@@ -16,10 +16,7 @@
 		<script src="vendor/threex/THREEx.screenshot.js"></script>
 		<script src="vendor/threex/THREEx.FullScreen.js"></script>
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
-		<script src="vendor/threex/THREEx.KeyboardState.js"></script>
 		<script src="vendor/DragPanControls.js"></script>
-
-		<script src="vendor/threex/THREEx.GeometryWobble.js"></script>
 
 		<link  href="css/main.css" rel="stylesheet"/>
 	</head>
@@ -38,7 +35,6 @@
 	<script type="text/javascript">
 		var stats, scene, renderer;
 		var camera, cameraControl;
-		var keyboard	= new THREEx.KeyboardState();
 
 		if( !init() )	animate();
 
@@ -105,33 +101,11 @@
 
 			// here you add your objects
 			// - you will most likely replace this part by your own
-			if( false ){
-				var geometry	= new THREE.CylinderGeometry( 0.2, 0, 0.1, 3);
-				var material	= new THREE.MeshNormalMaterial();
-				var mesh	= new THREE.Mesh( geometry, material );
-				mesh.rotation.x	= Math.PI; 
-				mesh.position.z	= 5;
-				mesh.position.y	= -0.90;
-				spaceShip	= mesh;
-				scene.add( mesh );
-			}
-			geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
-			//geometry	= new THREE.CylinderGeometry( 1, 1, 10 );
-
-
+			var geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
 			texture		= THREE.ImageUtils.loadTexture( "images/water.jpg" );
-			//texture.wrapS	= THREE.RepeatWrapping;
 			texture.wrapT	= THREE.RepeatWrapping;
-			texture.repeat.x= 1;
-			texture.repeat.y= 1;
 
-			var material	= new THREE.MeshLambertMaterial({
-				color	: 0xFFFFFF,
-				map	: texture,
-				shading	: THREE.SmoothShading
-			});
-			//var material	= new THREE.MeshNormalMaterial();
-
+			var material	= new THREE.MeshLambertMaterial({color : 0xFFFFFF, map : texture});
 			var mesh	= new THREE.Mesh( geometry, material );
 			mesh.rotation.x	= Math.PI/2;
 			scene.add( mesh );
@@ -154,37 +128,22 @@
 			stats.update();
 		}
 
-		var userAngleZ	= 0;
 		// render the scene
 		function render() {
 
 			// move the texture to give the illusion of moving thru the tunnel
-			texture.offset.y	+= 0.005;
+			texture.offset.y	+= 0.008;
 			texture.offset.y	%= 1;
-			texture.offset.x	+= 0.00;
-			texture.offset.x	%= 1;
 			texture.needsUpdate	= true;
 
-
-
-			if( keyboard.pressed("left") )	userAngleZ	+= 3 * Math.PI / 180;
-			if( keyboard.pressed("right") )	userAngleZ	-= 3 * Math.PI / 180;
-
+			// move the camera back and forth
 			var seconds		= Date.now() / 1000;
 			var radius		= 0.70;
-			var angle		= seconds / 2 * Math.PI;
-			//radius		= 0;
-			angle	= userAngleZ;
-			angle	= Math.sin(seconds * Math.PI) * 2;
+			var angle		= Math.sin(0.75 * seconds * Math.PI) / 4;
+			//angle	= (seconds*Math.PI)/4;
 			camera.position.x	= Math.cos(angle - Math.PI/2) * radius;
 			camera.position.y	= Math.sin(angle - Math.PI/2) * radius;
 			camera.rotation.z	= angle;
-			
-			if( typeof spaceShip !== "undefined" ){
-				spaceShip.position.x	= +camera.position.x;
-				spaceShip.position.y	= +camera.position.y;
-				spaceShip.rotation.z	= -camera.rotation.z;	
-			}
 
 			// actually render the scene
 			renderer.render( scene, camera );
