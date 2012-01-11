@@ -93,36 +93,28 @@
 			light.position.set( -1, 1, 0 ).normalize();
 			scene.add( light );
 			
-			//var light	= new THREE.AmbientLight( 0xff0000 );
-			//scene.add( light );
-	
-			var light	= new THREE.PointLight( 0x88aa00, 10, 20 );
-			light.position.set( 1, 0, -20 );
-			//scene.add( light );
-			
-			var light	= new THREE.PointLight( 0x66aa88, 15, 25 );
+			var light	= new THREE.PointLight( 0x44FFAA, 15, 25 );
 			light.position.set( 0, -3, 0 );
 			scene.add( light );
 			
 			var light	= new THREE.PointLight( 0xff4400, 20, 30 );
-			light.position.set( 0, 3, 0 );
+			light.position.set( 3, 3, 0 );
 			scene.add( light );
 			
-			scene.fog = new THREE.FogExp2( 0x000000, 0.15 );
-
-
+			scene.fog	= new THREE.FogExp2( 0x000000, 0.15 );
 
 			// here you add your objects
 			// - you will most likely replace this part by your own
-			var geometry	= new THREE.CylinderGeometry( 0.2, 0, 0.1, 3);
-			var material	= new THREE.MeshNormalMaterial();
-			var mesh	= new THREE.Mesh( geometry, material );
-			mesh.rotation.x	= Math.PI; 
-			mesh.position.z	= 5;
-			mesh.position.y	= -0.90;
-			spaceShip	= mesh;
-			scene.add( mesh );
-
+			if( false ){
+				var geometry	= new THREE.CylinderGeometry( 0.2, 0, 0.1, 3);
+				var material	= new THREE.MeshNormalMaterial();
+				var mesh	= new THREE.Mesh( geometry, material );
+				mesh.rotation.x	= Math.PI; 
+				mesh.position.z	= 5;
+				mesh.position.y	= -0.90;
+				spaceShip	= mesh;
+				scene.add( mesh );
+			}
 			geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
 			//geometry	= new THREE.CylinderGeometry( 1, 1, 10 );
 
@@ -134,7 +126,8 @@
 
 			var material	= new THREE.MeshLambertMaterial({
 				color	: 0xFFFFFF,
-				map	: texture
+				map	: texture,
+				shading	: THREE.SmoothShading
 			});
 			//var material	= new THREE.MeshNormalMaterial();
 
@@ -177,17 +170,20 @@
 			if( keyboard.pressed("right") )	userAngleZ	-= 3 * Math.PI / 180;
 
 			var seconds		= Date.now() / 1000;
-			var radius		= 0.80;
+			var radius		= 0.70;
 			var angle		= seconds / 2 * Math.PI;
+			//radius		= 0;
 			angle	= userAngleZ;
-			//angle	= Math.sin(seconds * Math.PI) * 1.5;
+			angle	= Math.sin(seconds * Math.PI) * 2;
 			camera.position.x	= Math.cos(angle - Math.PI/2) * radius;
 			camera.position.y	= Math.sin(angle - Math.PI/2) * radius;
 			camera.rotation.z	= angle;
 			
-			//spaceShip.position.x	= +camera.position.x;
-			//spaceShip.position.y	= +camera.position.y;
-			//spaceShip.rotation.z	= -camera.rotation.z;
+			if( typeof spaceShip !== "undefined" ){
+				spaceShip.position.x	= +camera.position.x;
+				spaceShip.position.y	= +camera.position.y;
+				spaceShip.rotation.z	= -camera.rotation.z;	
+			}
 
 			// actually render the scene
 			renderer.render( scene, camera );
