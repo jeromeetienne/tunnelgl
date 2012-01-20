@@ -8,6 +8,8 @@
 			
 		<script src="vendor/three.js/Three.js"></script>
 		<script src="vendor/three.js/Detector.js"></script>
+		<!-- see details at http://paulirish.com/2011/requestanimationframe-for-smart-animating/ -->
+		<script src="vendor/three.js/RequestAnimationFrame.js"></script>
 		<!-- https://github.com/mrdoob/stats.js -->
 		<script src="vendor/three.js/Stats.js"></script>
 
@@ -33,7 +35,7 @@
 	<script type="text/javascript">
 		var stats, scene, renderer;
 		var camera, cameraControl;
-		var ship;
+		var keyboard	= new THREEx.KeyboardState();
 
 		if( !init() )	animate();
 
@@ -80,60 +82,36 @@
 				document.getElementById('fullscreenDoc').style.display	= "none";				
 			}
 
-			//var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
-			//light.position.set( 1, 1, 0 ).normalize();
-			//scene.add( light );
-			//
-			//var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
-			//light.position.set( -1, 1, 0 ).normalize();
-			//scene.add( light );
-			
-			var light	= new THREE.PointLight( 0x44FFAA, 15, 50 );
-			light.position.set( 0, 3, 0 );
+			var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
+			light.position.set( 1, 1, 0 ).normalize();
 			scene.add( light );
 			
-			//var light	= new THREE.PointLight( 0xff4400, 20, 30 );
-			//light.position.set( 3,-3, 0 );
-			//scene.add( light );
+			var light	= new THREE.DirectionalLight( 0xff8000, 1.5 );
+			light.position.set( -1, 1, 0 ).normalize();
+			scene.add( light );
 			
-			//scene.fog	= new THREE.FogExp2( 0x000000, 0.15 );
+			var light	= new THREE.PointLight( 0x44FFAA, 15, 25 );
+			light.position.set( 0, -3, 0 );
+			scene.add( light );
+			
+			var light	= new THREE.PointLight( 0xff4400, 20, 30 );
+			light.position.set( 3, 3, 0 );
+			scene.add( light );
+			
+			scene.fog	= new THREE.FogExp2( 0x000000, 0.15 );
 
 			// here you add your objects
 			// - you will most likely replace this part by your own
 			var geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
-			geometry.computeFaceNormals();
-			geometry.computeVertexNormals();
-			geometry.faces.forEach(function(face){
-				face.normal.negate();
-				face.vertexNormals.forEach(function(normal){
-					normal.negate();
-				});
-			});
 			texture		= THREE.ImageUtils.loadTexture( "images/water.jpg" );
 			texture.wrapT	= THREE.RepeatWrapping;
-			var material	= new THREE.MeshLambertMaterial({color : 0xFFFFFF, map : texture });
+
+			var material	= new THREE.MeshLambertMaterial({color : 0xFFFFFF, map : texture});
 			var mesh	= new THREE.Mesh( geometry, material );
 			mesh.rotation.x	= Math.PI/2;
 			scene.add( mesh );
 
 			mesh.flipSided	= true;
-
-			if( false ){
-				var url	= 'models/viper/models/Viper Mk VII.dae';
-				//new THREE.ColladaLoader().load('models/toilet/models/Toilet (2) (2).dae', function(collada){
-				new THREE.ColladaLoader().load(url, function(collada){
-					var object3d		= collada.scene;
-					scene.add(object3d);
-					
-					ship	= object3d;
-					ship.scale.multiplyScalar(1)
-					ship.position.y	= -3;
-					ship.position.z	= -1;
-					ship.rotation.x	= -Math.PI/2;
-					//ship.rotation.z	= Math.PI;
-				});				
-			}
-
 		}
 
 		// animation loop
@@ -153,21 +131,16 @@
 
 		// render the scene
 		function render() {
-			
-			//var piPerSec	= Date.now()/Math.PI;
-			//ship.rotation.y	+= 0.01;
-			//ship.rotation.x	+= 0.01;
 
 			// move the texture to give the illusion of moving thru the tunnel
-			texture.offset.y	+= 0.008;
+			texture.offset.y	+= 0.005;
 			texture.offset.y	%= 1;
 			texture.needsUpdate	= true;
 
-			//// move the camera back and forth
+			// move the camera back and forth
 			var seconds		= Date.now() / 1000;
 			var radius		= 0.70;
-			var angle		= Math.sin(0.75 * seconds * Math.PI) / 4;
-			//angle	= (seconds*Math.PI)/4;
+			var angle		= Math.sin(seconds * Math.PI) * 2;
 			camera.position.x	= Math.cos(angle - Math.PI/2) * radius;
 			camera.position.y	= Math.sin(angle - Math.PI/2) * radius;
 			camera.rotation.z	= angle;
