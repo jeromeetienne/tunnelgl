@@ -20,7 +20,7 @@
 	</head>
 <body>
 	<!-- three.js container -->
-    	<div id="container"></div>
+    <div id="container"></div>
 	<!-- info on screen display -->
 	<div id="info">
 		<a href="http://learningthreejs.com/" target="_blank">LearningThree.js</a>: 
@@ -33,6 +33,7 @@
 	<script type="text/javascript">
 		var stats, scene, renderer;
 		var camera, cameraControl;
+		var texture;
 
 		if( !init() )	animate();
 
@@ -44,7 +45,7 @@
 					antialias		: true,	// to get smoother output
 					preserveDrawingBuffer	: true	// to allow screenshot
 				});
-				renderer.setClearColorHex( 0x000000, 1 );
+				renderer.setClearColor( 0x000000, 1 );
 			// uncomment if webgl is required
 			}else{
 				Detector.addGetWebGLMessage();
@@ -100,15 +101,29 @@
 			// here you add your objects
 			// - you will most likely replace this part by your own
 			var geometry	= new THREE.CylinderGeometry( 1, 1, 30, 32, 1, true );
-			texture		= THREE.ImageUtils.loadTexture( "images/water.jpg" );
-			texture.wrapT	= THREE.RepeatWrapping;
 
-			var material	= new THREE.MeshLambertMaterial({color : 0xFFFFFF, map : texture});
-			var mesh	= new THREE.Mesh( geometry, material );
-			mesh.rotation.x	= Math.PI/2;
-			scene.add( mesh );
+			// Loud our mesh in the new way
+			var textureLoader = new THREE.TextureLoader();
+			var material, mesh;
 
-			mesh.flipSided	= true;
+			textureLoader.load(
+				"images/water.jpg", 
+				function(text) {
+			    	texture = text;
+
+			    	texture.wrapT	= THREE.RepeatWrapping;
+
+					material	= new THREE.MeshLambertMaterial({color : 0xFFFFFF, map : texture});
+					material.side = THREE.DoubleSide; // new version of mesh.flipSided	= true;
+					mesh	= new THREE.Mesh( geometry, material );
+					mesh.rotation.x	= Math.PI/2;
+					scene.add( mesh );
+
+					console.log("Texture has loaded");
+			    } 
+			);
+
+			
 		}
 
 		// animation loop
@@ -128,20 +143,24 @@
 
 		// render the scene
 		function render() {
+			// Make sure the texture has loaded because the new way of loading isn't blocking
+			if(texture != null) {
 
-			// move the texture to give the illusion of moving thru the tunnel
-			texture.offset.y	+= 0.008;
-			texture.offset.y	%= 1;
-			texture.needsUpdate	= true;
+				// move the texture to give the illusion of moving thru the tunnel
+				texture.offset.y	+= 0.008;
+				texture.offset.y	%= 1;
 
-			// move the camera back and forth
-			var seconds		= Date.now() / 1000;
-			var radius		= 0.70;
-			var angle		= Math.sin(0.75 * seconds * Math.PI) / 4;
-			//angle	= (seconds*Math.PI)/4;
-			camera.position.x	= Math.cos(angle - Math.PI/2) * radius;
-			camera.position.y	= Math.sin(angle - Math.PI/2) * radius;
-			camera.rotation.z	= angle;
+				// move the camera back and forth
+				var seconds		= Date.now() / 1000;
+				var radius		= 0.70;
+				var angle		= Math.sin(0.75 * seconds * Math.PI) / 4;
+				//angle	= (seconds*Math.PI)/4;
+				camera.position.x	= Math.cos(angle - Math.PI/2) * radius;
+				camera.position.y	= Math.sin(angle - Math.PI/2) * radius;
+				camera.rotation.z	= angle;
+
+			} else 
+				console.log("Texture hasn't loaded yet");
 
 			// actually render the scene
 			renderer.render( scene, camera );
